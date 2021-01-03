@@ -1,3 +1,12 @@
-header > nav > a:hover {
+nav > div > ul > li > a:hover {
     border-bottom: 2px solid #0000002c;
+}
+
+nav > div > ul > li > a {
+    border-bottom: 2px solid #00000000;
+    border-top: 2px solid #00000000;
+}
+
+nav > a {
+    font-weight: bold;
 }
