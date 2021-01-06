@@ -9,6 +9,21 @@ class MyMeeting extends React.Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
+    getMeetings() {
+        fetch(`${config.SERVER_URL}/myReservation/`, {
+            method: "GET",
+        })
+            .then(res => res.json())
+            .then(res => {
+                this.setState({
+                    review_ids: res.reviewList
+                });
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     handleChange(event) {
         this.setState({ value: event.target.value });
     }
@@ -39,6 +54,7 @@ class MyMeeting extends React.Component {
     }
 
     render() {
+        this.getMeetings();
         const meetingList = this.generateMeetingList();
 
         return (

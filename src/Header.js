@@ -64,7 +64,6 @@ class Header extends React.Component {
             credentials: 'include'
         })
             .then(res => {
-                console.log(res);
                 $('#signup').modal('hide');
             })
             .catch(e => {
@@ -73,14 +72,12 @@ class Header extends React.Component {
     }
 
     checkRole() {
-        console.log('a');
         fetch(`${config.SERVER_URL}/login/current/`, {
             method: "GET",
             credentials: 'include'
         })
             .then(res => res.json())
             .then(res => {
-                console.log(res);
                 this.setState({ role: res.role });
             })
             .catch(e => {

@@ -180,7 +180,7 @@ class Reservation extends React.Component {
         const start = `${document.querySelector('#start').value}:00`;
         const end = start.substr(0, 11) + (parseInt(start.substr(11, 2)) + parseInt(time)).toString() + start.substr(12);
 
-        fetch(`${config.SERVER_URL}/reservation/create/`, {
+        fetch(`${config.SERVER_URL}/create/`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
