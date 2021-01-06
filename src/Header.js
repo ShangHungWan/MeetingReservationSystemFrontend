@@ -1,5 +1,7 @@
 import React from 'react';
 import * as config from './config';
+import { setCookie } from './tool';
+import $ from 'jquery';
 import './css/Header.css';
 import Reservation from './Reservation';
 import MyMeeting from './MyMeeting';
@@ -10,22 +12,76 @@ class Header extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            role: -1
         };
-        this.checkToken = this.checkToken.bind(this);
+    }
+
+    handelBtn(event) {
+        event.preventDefault();
     }
 
     login() {
         const account = document.querySelector('#loginAccount').value;
         const password = document.querySelector('#loginPassword').value;
+
+        let formData = new FormData();
+
+        formData.append('username', account);
+        formData.append('password', password);
+
         fetch(`${config.SERVER_URL}/login/`, {
             method: "POST",
-            body: {
-                username: account,
-                password: password
-            }
+            body: formData,
+            credentials: 'include'
+        })
+            .then(res => res.json())
+            .then(function (res) {
+                setCookie('sessionid', res.sessionid, 1);
+                $('#login').modal('hide');
+
+                this.checkRole();
+            }.bind(this))
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
+    signup() {
+        const account = document.querySelector('#signupAccount').value;
+        const email = document.querySelector('#email').value;
+        const password = document.querySelector('#signupPassword').value;
+
+        let formData = new FormData();
+
+        formData.append('username', account);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('role', '0');
+
+        fetch(`${config.SERVER_URL}/signup/`, {
+            method: "POST",
+            body: formData,
+            credentials: 'include'
         })
             .then(res => {
                 console.log(res);
+                $('#signup').modal('hide');
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
+    checkRole() {
+        console.log('a');
+        fetch(`${config.SERVER_URL}/login/current/`, {
+            method: "GET",
+            credentials: 'include'
+        })
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+                this.setState({ role: res.role });
             })
             .catch(e => {
                 console.log(e);
@@ -33,6 +89,44 @@ class Header extends React.Component {
     }
 
     render() {
+        let navUlDiv = "", navButton = "";
+        if (this.state.role === -1) {
+            navButton =
+                <form className="form-inline my-2 my-lg-0">
+                    <button className="mx-2 btn btn-outline-primary" data-toggle="modal" data-target="#login" onClick={this.handelBtn}>Log in</button>
+                    <button className="mx-2 btn btn-primary" data-toggle="modal" data-target="#signup" onClick={this.handelBtn}>Sign up</button>
+                </form>;
+            navUlDiv =
+                <ul className="navbar-nav mr-auto">
+                    <li className="nav-item">
+                        <Link to="/reservation" className="p-2 text-dark navbar-brand">預約狀況</Link>
+                    </li>
+                </ul>;
+        } else if (this.state.role === 2) {
+            navUlDiv =
+                <ul className="navbar-nav mr-auto">
+                    <li className="nav-item">
+                        <Link to="/reservation" className="p-2 text-dark navbar-brand">預約狀況</Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link to="/myMeeting" className="p-2 text-dark navbar-brand">我的會議</Link>
+                    </li>
+                </ul>;
+        } else {
+            navUlDiv =
+                <ul className="navbar-nav mr-auto">
+                    <li className="nav-item">
+                        <Link to="/reservation" className="p-2 text-dark navbar-brand">預約狀況</Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link to="/myMeeting" className="p-2 text-dark navbar-brand">我的會議</Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link to="/review" className="p-2 text-dark navbar-brand">審核會議</Link>
+                    </li>
+                </ul>;
+        }
+
         return (
             <Router>
                 <nav className="navbar navbar-expand-lg navbar-light bg-light p-4 border-bottom shadow-sm">
@@ -40,21 +134,8 @@ class Header extends React.Component {
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
-
-                    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul className="navbar-nav mr-auto">
-                            <li className="nav-item">
-                                <Link to="/reservation" className="p-2 text-dark navbar-brand">預約狀況</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link to="/myMeeting" className="p-2 text-dark navbar-brand">我的會議</Link>
-                            </li>
-                        </ul>
-                        <form className="form-inline my-2 my-lg-0">
-                            <button className="mx-2 btn btn-outline-primary" data-toggle="modal" data-target="#login" onClick={this.checkToken}>Log in</button>
-                            <button className="mx-2 btn btn-primary" data-toggle="modal" data-target="#signup" onClick={this.checkToken}>Sign up</button>
-                        </form>
-                    </div>
+                    {navUlDiv}
+                    {navButton}
                 </nav>
 
                 <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="loginLabel" aria-hidden="true">
@@ -107,13 +188,9 @@ class Header extends React.Component {
                                     <label htmlFor="detail">密碼</label>
                                     <input type="password" className="form-control" id="signupPassword" />
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="checkPassword">確認密碼</label>
-                                    <input type="password" className="form-control" id="signupCheckPassword" />
-                                </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary">Submit</button>
+                                <button type="button" className="btn btn-primary" onClick={this.signup}>Submit</button>
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
@@ -123,8 +200,7 @@ class Header extends React.Component {
                     <Route path="/" exact component={Reservation} />
                     <Route path="/reservation" component={Reservation} />
                     <Route path="/myMeeting" component={MyMeeting} />
-                    <Route path="/login" component={Login} />
-                    <Route path="/signup" component={Signup} />
+                    <Route path="/review" component={Review} />
                 </Switch>
             </Router >
         );
