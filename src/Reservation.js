@@ -16,6 +16,7 @@ class Reservation extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.showReservation = this.showReservation.bind(this);
         this.showNewReservation = this.showNewReservation.bind(this);
+        this.newReservation = this.newReservation.bind(this);
     }
 
     getRoomList() {
@@ -78,8 +79,8 @@ class Reservation extends React.Component {
                         const start = new Date(ele.start);
                         const end = new Date(ele.end);
                         if (start.getHours() <= (i + this.startTimeHour) && end.getHours() <= (i + this.startTimeHour + 1) && ele.room_id === this.state.rooms[j]._id) {
-                            status.push(<td key={`${i}-${j}`} className="table-active">
-                                <button className="btn btn-link" data-toggle="modal" data-target="#reservationDetail" data-reservation={idx} onClick={this.showReservation}>{ele.topic}</button>
+                            status.push(<td key={`${i}-${j}`} className="table-active align-middle">
+                                <button className="btn btn-link btn-sm" data-toggle="modal" data-target="#reservationDetail" data-reservation={idx} onClick={this.showReservation}>{ele.topic}</button>
                             </td>);
                             find = true;
                             return;
@@ -87,14 +88,15 @@ class Reservation extends React.Component {
                     });
                 }
                 if (!find) {
-                    status.push(<td key={`${i}-${j}`}>
-                        <button className="btn btn-outline-success" data-toggle="modal" data-target="#newReservation" onClick={this.showNewReservation} data-room={`${i}-${j}`}>預約</button>
+                    status.push(<td className="align-middle" key={`${i}-${j}`}>
+                        尚無預約<br />
+                        <button className="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#newReservation" onClick={this.showNewReservation} data-room={`${i}-${j}`}>預約</button>
                     </td>);
                 }
             }
 
-            timeList.push(<tr key={i} className="align-middle">
-                <th scope="row"> {(i + this.startTimeHour).toString().padStart(2, '0') + ":00"} </th>
+            timeList.push(<tr key={i}>
+                <th className="align-middle" scope="row"> {(i + this.startTimeHour).toString().padStart(2, '0') + ":00"} </th>
                 {status}
             </tr>);
         }
@@ -105,6 +107,14 @@ class Reservation extends React.Component {
         for (let ele of this.state.rooms) {
             if (ele._id === id) {
                 return ele.name;
+            }
+        }
+    }
+
+    getRoomId(name) {
+        for (let ele of this.state.rooms) {
+            if (ele.name === name) {
+                return ele._id;
             }
         }
     }
@@ -158,7 +168,38 @@ class Reservation extends React.Component {
     }
 
     handleChange(event) {
-        this.setState({ date: event.target.value, isChanged: true })
+        event.preventDefault();
+        this.setState({ date: document.querySelector('#date').value, isChanged: true })
+    }
+
+    newReservation() {
+        const title = document.querySelector('#title').value;
+        const detail = document.querySelector('#detail').value;
+        const room = this.getRoomId(document.querySelector('#room').value);
+        const time = document.querySelector('#time').value;
+        const start = `${document.querySelector('#start').value}:00`;
+        const end = start.substr(0, 11) + (parseInt(start.substr(11, 2)) + parseInt(time)).toString() + start.substr(12);
+
+        fetch(`${config.SERVER_URL}/reservation/create/`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                room_id: room,
+                topic: title,
+                detail: detail,
+                start: start,
+                end: end
+            })
+        })
+            .then(res => {
+                console.log(res);
+            })
+            .catch(e => {
+                console.log(e);
+            });
     }
 
     showLoading() {
@@ -186,7 +227,10 @@ class Reservation extends React.Component {
 
         return (
             <div className="container p-4">
-                <input className="col-auto my-3 form-control" id="date" type="date" defaultValue={this.state.date} onChange={this.handleChange} />
+                <form className="form-inline align-items-center">
+                    <input className="m-3 form-control" id="date" type="date" defaultValue={this.state.date} />
+                    <button className="btn btn-primary m-3" onClick={this.handleChange}>Search</button>
+                </form>
                 <div className="table-responsive">
                     <table className="table my-2 text-center">
                         <thead>
@@ -211,35 +255,29 @@ class Reservation extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <form>
-                                    <div className="form-group">
-                                        <label htmlFor="title">標題</label>
-                                        <input type="text" className="form-control" id="title" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="detail">描述</label>
-                                        <input type="text" className="form-control" id="detail" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="room">會議室</label>
-                                        <input type="text" readOnly className="form-control" id="room" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="start">開始時間</label>
-                                        <input type="text" readOnly className="form-control" id="start" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="time">持續時間</label>
-                                        <select className="form-control" id="time">
-                                            <option value="1">1 小時</option>
-                                            <option value="2">2 小時</option>
-                                            <option value="3">3 小時</option>
-                                        </select>
-                                    </div>
-                                </form>
+                                <div className="form-group">
+                                    <label htmlFor="title">標題</label>
+                                    <input type="text" className="form-control" id="title" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="detail">描述</label>
+                                    <input type="text" className="form-control" id="detail" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="room">會議室</label>
+                                    <input type="text" readOnly className="form-control" id="room" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="start">開始時間</label>
+                                    <input type="text" readOnly className="form-control" id="start" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="time">持續時間</label>
+                                    <select className="form-control" id="time"></select>
+                                </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary">Submit</button>
+                                <button type="button" className="btn btn-primary" onClick={this.newReservation}>Submit</button>
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>

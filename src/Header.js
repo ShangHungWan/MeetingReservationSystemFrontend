@@ -1,12 +1,37 @@
 import React from 'react';
+import * as config from './config';
 import './css/Header.css';
 import Reservation from './Reservation';
 import MyMeeting from './MyMeeting';
-import Login from './Login';
-import Signup from './Signup';
+import Review from './Review';
 import { BrowserRouter as Router, Link, Switch, Route } from 'react-router-dom';
 
 class Header extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+        };
+        this.checkToken = this.checkToken.bind(this);
+    }
+
+    login() {
+        const account = document.querySelector('#loginAccount').value;
+        const password = document.querySelector('#loginPassword').value;
+        fetch(`${config.SERVER_URL}/login/`, {
+            method: "POST",
+            body: {
+                username: account,
+                password: password
+            }
+        })
+            .then(res => {
+                console.log(res);
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     render() {
         return (
             <Router>
@@ -26,11 +51,74 @@ class Header extends React.Component {
                             </li>
                         </ul>
                         <form className="form-inline my-2 my-lg-0">
-                            <Link to="/login" className="mx-2 btn btn-outline-primary">Log in</Link>
-                            <Link to="/signup" className="mx-2 btn btn-primary">Sign up</Link>
+                            <button className="mx-2 btn btn-outline-primary" data-toggle="modal" data-target="#login" onClick={this.checkToken}>Log in</button>
+                            <button className="mx-2 btn btn-primary" data-toggle="modal" data-target="#signup" onClick={this.checkToken}>Sign up</button>
                         </form>
                     </div>
                 </nav>
+
+                <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="loginLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="loginLabel">登入</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+                                <div className="form-group">
+                                    <label htmlFor="title">帳號</label>
+                                    <input type="text" className="form-control" id="loginAccount" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="detail">密碼</label>
+                                    <input type="password" className="form-control" id="loginPassword" />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={this.login}>Submit</button>
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="modal fade" id="signup" tabIndex="-1" aria-labelledby="signupLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="signupLabel">註冊</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="form-group">
+                                    <label htmlFor="title">帳號</label>
+                                    <input type="text" className="form-control" id="signupAccount" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="email">E-mail</label>
+                                    <input type="email" className="form-control" id="email" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="detail">密碼</label>
+                                    <input type="password" className="form-control" id="signupPassword" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="checkPassword">確認密碼</label>
+                                    <input type="password" className="form-control" id="signupCheckPassword" />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary">Submit</button>
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <Switch>
                     <Route path="/" exact component={Reservation} />
                     <Route path="/reservation" component={Reservation} />
