@@ -11,6 +11,7 @@ class Reservation extends React.Component {
             rooms: null,
             isLoadedReview: false,
             isLoadedRoom: false,
+            isCheckRole: true,
             action: "",
             idx: -1
         };
@@ -157,7 +158,27 @@ class Reservation extends React.Component {
         </div>);
     }
 
+    checkRole() {
+        this.setState({ isCheckRole: false });
+        fetch(`${config.SERVER_URL}/login/current/`, {
+            method: "GET",
+            credentials: 'include'
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.status || res.account.role === 2) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     render() {
+        if (this.state.isCheckRole) {
+            this.checkRole();
+        }
         if (!this.state.isLoadedRoom) {
             this.getRoomList();
         }

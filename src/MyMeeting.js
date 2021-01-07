@@ -5,7 +5,13 @@ import { getRoomName } from './tool';
 class MyMeeting extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { value: 'all', meetings: null, isLoadedRoom: false, isLoadedMeeting: false };
+        this.state = {
+            value: 'all',
+            meetings: null,
+            isLoadedRoom: false,
+            isLoadedMeeting: false,
+            isCheckRole: true
+        };
 
         this.handleChange = this.handleChange.bind(this);
     }
@@ -32,9 +38,6 @@ class MyMeeting extends React.Component {
     }
 
     generateMeetingList() {
-        if (!this.state.meetings) {
-            return;
-        }
         let meetingList = [];
         for (let ele of this.state.meetings) {
             const action = Math.floor(Math.random() * 5) === 0 ? <td>
@@ -98,14 +101,34 @@ class MyMeeting extends React.Component {
             });
     }
 
+    checkRole() {
+        this.setState({ isCheckRole: false });
+        fetch(`${config.SERVER_URL}/login/current/`, {
+            method: "GET",
+            credentials: 'include'
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.status) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     render() {
+        if (this.state.isCheckRole) {
+            this.checkRole();
+        }
         if (!this.state.isLoadedRoom) {
             this.getRoomList();
         }
         if (!this.state.isLoadedMeeting) {
             this.getMeetings();
         }
-        if (!this.state.meetings && !this.state.rooms) {
+        if (!this.state.meetings || !this.state.rooms) {
             return null;
         }
         const meetingList = this.generateMeetingList();

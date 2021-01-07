@@ -1,5 +1,3 @@
-import * as config from './config';
-
 function setCookie(cname, cvalue) {
     var d = new Date();
     d.setTime(d.getTime() + (1 * 24 * 60 * 60 * 1000));
