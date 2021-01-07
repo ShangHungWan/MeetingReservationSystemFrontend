@@ -88,6 +88,7 @@ class Header extends React.Component {
         })
             .then(res => {
                 this.setState({ role: -1, isCheckLogin: false });
+                setCookie('sessionid', '');
                 window.location.href = '/';
             })
             .catch(e => {
@@ -105,7 +106,7 @@ class Header extends React.Component {
                 if (!res.status) {
                     this.setState({ role: -1, isCheckLogin: false });
                 } else {
-                    this.setState({ role: res.role, isCheckLogin: false });
+                    this.setState({ role: res.account.role, isCheckLogin: false });
                 }
             })
             .catch(e => {
