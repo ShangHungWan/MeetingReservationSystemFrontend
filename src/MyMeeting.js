@@ -76,7 +76,7 @@ class MyMeeting extends React.Component {
                 <td>{ele.attendees.length}</td>
                 <td>{ele.askers.length}</td>
                 {action}
-                {statusTxt}
+                <td>{statusTxt}</td>
             </tr>;
 
             meetingList.push(meetingInfo);
