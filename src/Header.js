@@ -12,7 +12,7 @@ class Header extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            role: -1,
+            role: "",
             isCheckLogin: true
         };
 
@@ -44,7 +44,7 @@ class Header extends React.Component {
                     setCookie('sessionid', res.sessionid);
                     $('#login').modal('hide');
 
-                    this.setState({ role: -1, isCheckLogin: true });
+                    this.setState({ role: "", isCheckLogin: true });
                 } else {
                     document.querySelector('#msg').className += ' show';
                 }
@@ -86,7 +86,7 @@ class Header extends React.Component {
             credentials: 'include'
         })
             .then(res => {
-                this.setState({ role: -1, isCheckLogin: false });
+                this.setState({ role: "", isCheckLogin: false });
                 setCookie('sessionid', '');
                 window.location.href = '/';
             })
@@ -103,7 +103,7 @@ class Header extends React.Component {
             .then(res => res.json())
             .then(res => {
                 if (!res.status) {
-                    this.setState({ role: -1, isCheckLogin: false });
+                    this.setState({ role: "", isCheckLogin: false });
                 } else {
                     this.setState({ role: res.account.role, isCheckLogin: false });
                 }
@@ -114,12 +114,12 @@ class Header extends React.Component {
     }
 
     render() {
-        if (this.state.role === -1 && this.state.isCheckLogin) {
+        if (this.state.role === "" && this.state.isCheckLogin) {
             this.checkRole();
         }
 
         let navUlDiv = "", navButton = "";
-        if (this.state.role === -1) {
+        if (this.state.role === "") {
             navButton =
                 <form className="form-inline my-2 my-lg-0">
                     <button className="mx-2 btn btn-outline-primary" data-toggle="modal" data-target="#login" onClick={this.handelBtn}>Log in</button>
@@ -131,7 +131,7 @@ class Header extends React.Component {
                         <Link to="/reservation" className="p-2 text-dark navbar-brand">預約狀況</Link>
                     </li>
                 </ul>;
-        } else if (this.state.role === 2) {
+        } else if (this.state.role === "2") {
             navButton =
                 <form className="form-inline my-2 my-lg-0">
                     <button className="mx-2 btn btn-outline-primary" onClick={this.logout}>Log out</button>
