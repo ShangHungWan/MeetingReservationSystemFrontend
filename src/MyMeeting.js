@@ -38,9 +38,54 @@ class MyMeeting extends React.Component {
         this.setState({ value: event.target.value });
     }
 
+    leave(event) {
+        event.preventDefault();
+        const id = event.target.dataset.id;
+
+        // formData.append('status', actionIdx);
+
+        // fetch(`${config.SERVER_URL}/review/`, {
+        //     method: "POST",
+        //     credentials: 'include',
+        //     body: formData
+        // })
+        //     .then(res => {
+        //         this.removeElement(id);
+        //         console.log(res);
+        //     })
+        //     .catch(e => {
+        //         console.log(e);
+        //     });
+    }
+
+    removeElement(id) {
+        let newList = [];
+        for (let ele of this.state.meetings) {
+            if (ele._id !== id) {
+                newList.push(ele);
+            }
+        }
+        this.setState({ meetings: newList });
+    }
+
+    findMyId(idx) {
+        for (let ele of this.state.meetings[idx].attendees) {
+            if (ele.username === this.state.name) {
+                return ele.ar_id;
+            }
+        }
+        return "";
+    }
+
     generateMeetingList() {
         let meetingList = [];
+        let idx = 0;
         for (let ele of this.state.meetings) {
+
+            let action = <td>
+                <button className="btn btn-danger" data-id={this.findMyId(idx)} onClick={this.leave}>退出</button>
+            </td>;
+
             const status = ele.status;
             let statusTxt;
             switch (status) {
@@ -70,9 +115,11 @@ class MyMeeting extends React.Component {
                 {/* <td>{ele.attendees.length}</td>
                 <td>{ele.askers.length}</td> */}
                 <td>{statusTxt}</td>
+                {action}
             </tr>;
 
             meetingList.push(meetingInfo);
+            idx++;
         }
         return meetingList;
     }
@@ -130,12 +177,6 @@ class MyMeeting extends React.Component {
 
         return (
             <div className="container p-4">
-                <select value={this.state.value} onChange={this.handleChange}>
-                    <option value="all">全部</option>
-                    <option value="scheduled">尚未開始</option>
-                    <option value="finished">已結束</option>
-                    <option value="applying">申請中</option>
-                </select>
                 <div className="table-responsive">
                     <table className="table my-2 text-center table-hove">
                         <thead>
@@ -148,6 +189,7 @@ class MyMeeting extends React.Component {
                                 {/* <th className="align-middle" scope="col">參與人數</th>
                                 <th className="align-middle" scope="col">要求參與人數</th> */}
                                 <th className="align-middle" scope="col">狀態</th>
+                                <th className="align-middle" scope="col">動作</th>
                             </tr>
                         </thead>
                         <tbody>
