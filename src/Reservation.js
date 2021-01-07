@@ -39,7 +39,7 @@ class Reservation extends React.Component {
 
         let date = this.state.date;
 
-        fetch(`${config.SERVER_URL}/reservation/?date=${date}/`, {
+        fetch(`${config.SERVER_URL}/reservation/?date=${date}`, {
             method: "GET",
             credentials: 'include'
         })
@@ -80,7 +80,7 @@ class Reservation extends React.Component {
                     this.state.reservations.forEach((ele, idx) => {
                         const start = new Date(ele.start);
                         const end = new Date(ele.end);
-                        if (start.getHours() <= (i + this.startTimeHour) && end.getHours() <= (i + this.startTimeHour + 1) && ele.room_id === this.state.rooms[j]._id) {
+                        if ((i + this.startTimeHour) >= start.getHours() && (i + this.startTimeHour) <= end.getHours() && ele.room_id === this.state.rooms[j]._id) {
                             status.push(<td key={`${i}-${j}`} className="table-active align-middle">
                                 <button className="btn btn-link btn-sm" data-toggle="modal" data-target="#reservationDetail" data-reservation={idx} onClick={this.showReservation}>{ele.topic}</button>
                             </td>);

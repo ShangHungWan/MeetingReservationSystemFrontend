@@ -80,7 +80,6 @@ class Header extends React.Component {
     }
 
     logout(event) {
-        console.log(event);
         event.preventDefault();
         fetch(`${config.SERVER_URL}/logout/`, {
             method: "GET",
