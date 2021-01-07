@@ -64,7 +64,7 @@ class Header extends React.Component {
         formData.append('username', account);
         formData.append('email', email);
         formData.append('password', password);
-        formData.append('role', '0');
+        formData.append('role', '2');
 
         fetch(`${config.SERVER_URL}/signup/`, {
             method: "POST",
