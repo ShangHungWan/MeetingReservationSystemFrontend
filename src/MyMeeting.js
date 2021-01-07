@@ -10,7 +10,8 @@ class MyMeeting extends React.Component {
             meetings: null,
             isLoadedRoom: false,
             isLoadedMeeting: false,
-            isCheckRole: true
+            isCheckRole: true,
+            name: "",
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -40,26 +41,19 @@ class MyMeeting extends React.Component {
     generateMeetingList() {
         let meetingList = [];
         for (let ele of this.state.meetings) {
-            const action = Math.floor(Math.random() * 5) === 0 ? <td>
-                <button className="btn btn-primary mx-1">邀請</button>
-                <button className="btn btn-danger mx-1">解散</button>
-            </td> : <td>
-                    <button className="btn btn-danger">退出</button>
-                </td>;
-
             const status = ele.status;
             let statusTxt;
             switch (status) {
-                case 0:
-                    statusTxt = "正常"
+                case "0":
+                    statusTxt = "正常舉辦"
                     break;
-                case 3:
+                case "3":
                     statusTxt = "主辦人審核中"
                     break;
-                case 5:
+                case "5":
                     statusTxt = "申請已被拒絕"
                     break;
-                case 6:
+                case "6":
                     statusTxt = "申請審核中"
                     break;
                 default:
@@ -73,9 +67,8 @@ class MyMeeting extends React.Component {
                 <td>{ele.host_name}</td>
                 <td>{getRoomName(ele.room_id, this.state.rooms)}</td>
                 <td>{ele.start.slice(0, 19)} ~ {ele.end.slice(0, 19)}</td>
-                <td>{ele.attendees.length}</td>
-                <td>{ele.askers.length}</td>
-                {action}
+                {/* <td>{ele.attendees.length}</td>
+                <td>{ele.askers.length}</td> */}
                 <td>{statusTxt}</td>
             </tr>;
 
@@ -111,6 +104,8 @@ class MyMeeting extends React.Component {
             .then(res => {
                 if (!res.status) {
                     window.location.href = '/';
+                } else {
+                    this.setState({ name: res.account.username });
                 }
             })
             .catch(e => {
@@ -150,9 +145,8 @@ class MyMeeting extends React.Component {
                                 <th className="align-middle" scope="col">主辦者</th>
                                 <th className="align-middle" scope="col">會議室</th>
                                 <th className="align-middle" scope="col">時間</th>
-                                <th className="align-middle" scope="col">參與人數</th>
-                                <th className="align-middle" scope="col">要求參與人數</th>
-                                <th className="align-middle" scope="col">動作</th>
+                                {/* <th className="align-middle" scope="col">參與人數</th>
+                                <th className="align-middle" scope="col">要求參與人數</th> */}
                                 <th className="align-middle" scope="col">狀態</th>
                             </tr>
                         </thead>

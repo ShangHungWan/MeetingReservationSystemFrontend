@@ -103,7 +103,6 @@ class Reservation extends React.Component {
     }
 
     handleChange(event) {
-        console.log(event.target.dataset);
         event.preventDefault();
         this.submitReview(event.target.dataset.id, event.target.dataset.action);
     }

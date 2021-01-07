@@ -13,6 +13,7 @@ class Header extends React.Component {
         super(props);
         this.state = {
             role: "",
+            name: "",
             isCheckLogin: true
         };
 
@@ -42,9 +43,7 @@ class Header extends React.Component {
             .then(res => {
                 if (res.status) {
                     setCookie('sessionid', res.sessionid);
-                    $('#login').modal('hide');
-
-                    this.setState({ role: "", isCheckLogin: true });
+                    window.location.href = '/';
                 } else {
                     document.querySelector('#msg').className += ' show';
                 }
@@ -86,7 +85,6 @@ class Header extends React.Component {
             credentials: 'include'
         })
             .then(res => {
-                this.setState({ role: "", isCheckLogin: false });
                 setCookie('sessionid', '');
                 window.location.href = '/';
             })
@@ -105,7 +103,7 @@ class Header extends React.Component {
                 if (!res.status) {
                     this.setState({ role: "", isCheckLogin: false });
                 } else {
-                    this.setState({ role: res.account.role, isCheckLogin: false });
+                    this.setState({ role: res.account.role, name: res.account.username, isCheckLogin: false });
                 }
             })
             .catch(e => {
@@ -134,6 +132,7 @@ class Header extends React.Component {
         } else if (this.state.role === "2") {
             navButton =
                 <form className="form-inline my-2 my-lg-0">
+                    Hi, {this.state.name}
                     <button className="mx-2 btn btn-outline-primary" onClick={this.logout}>Log out</button>
                 </form>;
             navUlDiv =
@@ -148,6 +147,7 @@ class Header extends React.Component {
         } else {
             navButton =
                 <form className="form-inline my-2 my-lg-0">
+                    Hi, {this.state.name}
                     <button className="mx-2 btn btn-outline-primary" onClick={this.logout}>Log out</button>
                 </form>;
             navUlDiv =

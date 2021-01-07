@@ -10,7 +10,10 @@ class Reservation extends React.Component {
             rooms: null,
             reservations: null,
             isLoading: false,
-            isChanged: false
+            isChanged: true,
+            role: "",
+            isCheckLogin: true,
+            isRoomLoaded: false,
         };
 
         this.startTimeHour = 9;
@@ -21,6 +24,7 @@ class Reservation extends React.Component {
     }
 
     getRoomList() {
+        this.setState({ isRoomLoaded: true });
         fetch(`${config.SERVER_URL}/room/`, { method: "GET" })
             .then(res => res.json())
             .then(res => {
@@ -90,10 +94,18 @@ class Reservation extends React.Component {
                     });
                 }
                 if (!find) {
-                    status.push(<td className="align-middle" key={`${i}-${j}`}>
-                        尚無預約<br />
-                        <button className="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#newReservation" onClick={this.showNewReservation} data-room={`${i}-${j}`}>預約</button>
-                    </td>);
+                    let cell;
+                    if (this.state.role !== "") {
+                        cell = <td className="align-middle" key={`${i}-${j}`}>
+                            尚無預約<br />
+                            <button className="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#newReservation" onClick={this.showNewReservation} data-room={`${i}-${j}`}>預約</button>
+                        </td>;
+                    } else {
+                        cell = <td className="align-middle" key={`${i}-${j}`}>
+                            尚無預約
+                        </td>;
+                    }
+                    status.push(cell);
                 }
             }
 
@@ -110,7 +122,7 @@ class Reservation extends React.Component {
         const reservation = this.state.reservations[idx];
 
         const spans = document.querySelectorAll('#reservationDetail > div > div > div:nth-child(2) > div span');
-        spans[0].innerHTML = reservation.host_id;
+        spans[0].innerHTML = reservation.host_name;
         spans[1].innerHTML = getRoomName(reservation.room_id, this.state.rooms);
         spans[2].innerHTML = reservation.detail;
         spans[3].innerHTML = `${reservation.start.slice(0, 19)} ~ ${reservation.end.slice(0, 19)}`;
@@ -121,7 +133,7 @@ class Reservation extends React.Component {
 
     showNewReservation(event) {
         const idx = event.target.dataset.room.split('-');
-        const time = this.startTimeHour + parseInt(idx[0]);
+        const time = (this.startTimeHour + parseInt(idx[0])).toString().padStart(2, '0');
         const room = this.state.rooms[idx[1]];
 
         this.generateTimeOption(idx);
@@ -155,7 +167,7 @@ class Reservation extends React.Component {
 
     handleChange(event) {
         event.preventDefault();
-        this.setState({ date: document.querySelector('#date').value, isChanged: true })
+        this.setState({ date: document.querySelector('#date').value, isChanged: true });
     }
 
     newReservation() {
@@ -164,7 +176,7 @@ class Reservation extends React.Component {
         const room = document.querySelector('#room').value;
         const time = document.querySelector('#time').value;
         const start = `${document.querySelector('#start').value}:00`;
-        const end = start.substr(0, 11) + (parseInt(start.substr(11, 2)) + parseInt(time)).toString() + start.substr(12);
+        const end = start.substr(0, 11) + (parseInt(start.substr(11, 2)) + parseInt(time)).toString() + start.substr(13);
 
         let formData = new FormData();
 
@@ -187,6 +199,25 @@ class Reservation extends React.Component {
             });
     }
 
+    checkRole() {
+        this.setState({ isCheckLogin: false });
+        fetch(`${config.SERVER_URL}/login/current/`, {
+            method: "GET",
+            credentials: 'include'
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.status) {
+                    this.setState({ role: "" });
+                } else {
+                    this.setState({ role: res.account.role });
+                }
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     showLoading() {
         return (<div className="d-flex p-5">
             <div className="d-flex w-100 justify-content-center align-self-center">
@@ -196,19 +227,26 @@ class Reservation extends React.Component {
     }
 
     render() {
-        if ((!this.state.rooms || this.state.rooms.length === 0)) {
+        if (this.state.role === "" && this.state.isCheckLogin) {
+            this.checkRole();
+        }
+        if (!this.state.isRoomLoaded) {
             this.getRoomList();
+        }
+        if (this.state.rooms === null) {
             return this.showLoading();
         }
-        // if (this.state.isLoading) {
-        //     return this.showLoading();
-        // }
         if (this.state.isChanged) {
             this.getReservationOfDate();
         }
 
         const room = this.generateRoomList();
         const time = this.generateTimeList();
+
+        // let joinBtn = "";
+        // if (this.state.role !== "") {
+        //     joinBtn = <button type="button" className="btn btn-primary">Join</button>;
+        // }
 
         return (
             <div className="container p-4">
@@ -297,7 +335,7 @@ class Reservation extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary">Join</button>
+                                {/* {joinBtn} */}
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
