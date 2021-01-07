@@ -12,8 +12,12 @@ class Header extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            role: -1
+            role: -1,
+            isCheckLogin: true
         };
+
+        this.login = this.login.bind(this);
+        this.logout = this.logout.bind(this);
     }
 
     handelBtn(event) {
@@ -35,12 +39,16 @@ class Header extends React.Component {
             credentials: 'include'
         })
             .then(res => res.json())
-            .then(function (res) {
-                setCookie('sessionid', res.sessionid, 1);
-                $('#login').modal('hide');
+            .then(res => {
+                if (res.status) {
+                    setCookie('sessionid', res.sessionid);
+                    $('#login').modal('hide');
 
-                this.checkRole();
-            }.bind(this))
+                    this.setState({ role: -1, isCheckLogin: true });
+                } else {
+                    document.querySelector('#msg').className += ' show';
+                }
+            })
             .catch(e => {
                 console.log(e);
             });
@@ -71,6 +79,22 @@ class Header extends React.Component {
             });
     }
 
+    logout(event) {
+        console.log(event);
+        event.preventDefault();
+        fetch(`${config.SERVER_URL}/logout/`, {
+            method: "GET",
+            credentials: 'include'
+        })
+            .then(res => {
+                this.setState({ role: -1, isCheckLogin: false });
+                window.location.href = '/';
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     checkRole() {
         fetch(`${config.SERVER_URL}/login/current/`, {
             method: "GET",
@@ -78,7 +102,11 @@ class Header extends React.Component {
         })
             .then(res => res.json())
             .then(res => {
-                this.setState({ role: res.role });
+                if (!res.status) {
+                    this.setState({ role: -1, isCheckLogin: false });
+                } else {
+                    this.setState({ role: res.role, isCheckLogin: false });
+                }
             })
             .catch(e => {
                 console.log(e);
@@ -86,6 +114,10 @@ class Header extends React.Component {
     }
 
     render() {
+        if (this.state.role === -1 && this.state.isCheckLogin) {
+            this.checkRole();
+        }
+
         let navUlDiv = "", navButton = "";
         if (this.state.role === -1) {
             navButton =
@@ -100,6 +132,10 @@ class Header extends React.Component {
                     </li>
                 </ul>;
         } else if (this.state.role === 2) {
+            navButton =
+                <form className="form-inline my-2 my-lg-0">
+                    <button className="mx-2 btn btn-outline-primary" onClick={this.logout}>Log out</button>
+                </form>;
             navUlDiv =
                 <ul className="navbar-nav mr-auto">
                     <li className="nav-item">
@@ -110,6 +146,10 @@ class Header extends React.Component {
                     </li>
                 </ul>;
         } else {
+            navButton =
+                <form className="form-inline my-2 my-lg-0">
+                    <button className="mx-2 btn btn-outline-primary" onClick={this.logout}>Log out</button>
+                </form>;
             navUlDiv =
                 <ul className="navbar-nav mr-auto">
                     <li className="nav-item">
@@ -156,6 +196,9 @@ class Header extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-footer">
+                                <div id="msg" className="alert alert-warning alert-dismissible fade" role="alert">
+                                    帳號或密碼錯誤！
+                                </div>
                                 <button type="button" className="btn btn-primary" onClick={this.login}>Submit</button>
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
