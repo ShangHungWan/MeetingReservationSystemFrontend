@@ -1,22 +1,25 @@
 import * as config from './config';
 import React from 'react';
+import { getRoomName } from './tool';
 
 class MyMeeting extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { value: 'all', meetings: null };
+        this.state = { value: 'all', meetings: null, isLoadedRoom: false, isLoadedMeeting: false };
 
         this.handleChange = this.handleChange.bind(this);
     }
 
     getMeetings() {
+        this.setState({ isLoadedMeeting: true });
         fetch(`${config.SERVER_URL}/myReservation/`, {
             method: "GET",
+            credentials: 'include'
         })
             .then(res => res.json())
             .then(res => {
                 this.setState({
-                    review_ids: res.reviewList
+                    meetings: res.reservations
                 });
             })
             .catch(e => {
@@ -29,8 +32,11 @@ class MyMeeting extends React.Component {
     }
 
     generateMeetingList() {
+        if (!this.state.meetings) {
+            return;
+        }
         let meetingList = [];
-        for (let i = 0; i < 30; i++) {
+        for (let ele of this.state.meetings) {
             const action = Math.floor(Math.random() * 5) === 0 ? <td>
                 <button className="btn btn-primary mx-1">邀請</button>
                 <button className="btn btn-danger mx-1">解散</button>
@@ -38,14 +44,36 @@ class MyMeeting extends React.Component {
                     <button className="btn btn-danger">退出</button>
                 </td>;
 
-            const meetingInfo = <tr key={i} className="align-middle">
-                <td> {i + 'RR'} </td>
-                <td>qweiu1jh2guv34i</td>
-                <td>123ijp123</td>
-                <td>room122</td>
-                <td>2020/12/31 20:00 ~ 2020/12/31 21:00</td>
-                <td>10/10</td>
+            const status = ele.status;
+            let statusTxt;
+            switch (status) {
+                case 0:
+                    statusTxt = "正常"
+                    break;
+                case 3:
+                    statusTxt = "主辦人審核中"
+                    break;
+                case 5:
+                    statusTxt = "申請已被拒絕"
+                    break;
+                case 6:
+                    statusTxt = "申請審核中"
+                    break;
+                default:
+                    statusTxt = ""
+                    break;
+            }
+
+            const meetingInfo = <tr key={ele._id} className="align-middle">
+                <td> {ele.topic} </td>
+                <td>{ele.detail}</td>
+                <td>{ele.host_name}</td>
+                <td>{getRoomName(ele.room_id, this.state.rooms)}</td>
+                <td>{ele.start.slice(0, 19)} ~ {ele.end.slice(0, 19)}</td>
+                <td>{ele.attendees.length}</td>
+                <td>{ele.askers.length}</td>
                 {action}
+                {statusTxt}
             </tr>;
 
             meetingList.push(meetingInfo);
@@ -53,8 +81,33 @@ class MyMeeting extends React.Component {
         return meetingList;
     }
 
+    getRoomList() {
+        this.setState({ isLoadedRoom: true });
+        fetch(`${config.SERVER_URL}/room/`, {
+            method: "GET",
+            credentials: 'include'
+        })
+            .then(res => res.json())
+            .then(res => {
+                this.setState({
+                    rooms: res.rooms
+                });
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     render() {
-        this.getMeetings();
+        if (!this.state.isLoadedRoom) {
+            this.getRoomList();
+        }
+        if (!this.state.isLoadedMeeting) {
+            this.getMeetings();
+        }
+        if (!this.state.meetings && !this.state.rooms) {
+            return null;
+        }
         const meetingList = this.generateMeetingList();
 
         return (
@@ -75,7 +128,9 @@ class MyMeeting extends React.Component {
                                 <th className="align-middle" scope="col">會議室</th>
                                 <th className="align-middle" scope="col">時間</th>
                                 <th className="align-middle" scope="col">參與人數</th>
+                                <th className="align-middle" scope="col">要求參與人數</th>
                                 <th className="align-middle" scope="col">動作</th>
+                                <th className="align-middle" scope="col">狀態</th>
                             </tr>
                         </thead>
                         <tbody>

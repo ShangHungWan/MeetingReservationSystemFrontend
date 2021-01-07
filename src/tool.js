@@ -1,7 +1,8 @@
+import * as config from './config';
 
-function setCookie(cname, cvalue, exdays) {
+function setCookie(cname, cvalue) {
     var d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    d.setTime(d.getTime() + (1 * 24 * 60 * 60 * 1000));
     var expires = "expires=" + d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
@@ -21,4 +22,12 @@ function getCookie(cname) {
     return "";
 }
 
-export { setCookie, getCookie };
+function getRoomName(id, arr) {
+    for (let ele of arr) {
+        if (ele._id === id) {
+            return ele.name;
+        }
+    }
+}
+
+export { setCookie, getCookie, getRoomName };

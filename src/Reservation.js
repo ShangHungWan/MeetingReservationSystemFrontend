@@ -1,5 +1,6 @@
 import * as config from './config';
 import React from 'react';
+import { getRoomName } from './tool';
 
 class Reservation extends React.Component {
     constructor(props) {
@@ -38,8 +39,9 @@ class Reservation extends React.Component {
 
         let date = this.state.date;
 
-        fetch(`${config.SERVER_URL}/reservation/?date=${date}`, {
+        fetch(`${config.SERVER_URL}/reservation/?date=${date}/`, {
             method: "GET",
+            credentials: 'include'
         })
             .then(res => res.json())
             .then(res => {
@@ -103,29 +105,13 @@ class Reservation extends React.Component {
         return timeList;
     }
 
-    getRoomName(id) {
-        for (let ele of this.state.rooms) {
-            if (ele._id === id) {
-                return ele.name;
-            }
-        }
-    }
-
-    getRoomId(name) {
-        for (let ele of this.state.rooms) {
-            if (ele.name === name) {
-                return ele._id;
-            }
-        }
-    }
-
     showReservation(event) {
         const idx = parseInt(event.target.dataset.reservation);
         const reservation = this.state.reservations[idx];
 
         const spans = document.querySelectorAll('#reservationDetail > div > div > div:nth-child(2) > div span');
         spans[0].innerHTML = reservation.host_id;
-        spans[1].innerHTML = this.getRoomName(reservation.room_id);
+        spans[1].innerHTML = getRoomName(reservation.room_id, this.state.rooms);
         spans[2].innerHTML = reservation.detail;
         spans[3].innerHTML = `${reservation.start.slice(0, 19)} ~ ${reservation.end.slice(0, 19)}`;
 
@@ -175,24 +161,23 @@ class Reservation extends React.Component {
     newReservation() {
         const title = document.querySelector('#title').value;
         const detail = document.querySelector('#detail').value;
-        const room = this.getRoomId(document.querySelector('#room').value);
+        const room = document.querySelector('#room').value;
         const time = document.querySelector('#time').value;
         const start = `${document.querySelector('#start').value}:00`;
         const end = start.substr(0, 11) + (parseInt(start.substr(11, 2)) + parseInt(time)).toString() + start.substr(12);
 
+        let formData = new FormData();
+
+        formData.append('roomname', room);
+        formData.append('topic', title);
+        formData.append('detail', detail);
+        formData.append('start', start);
+        formData.append('end', end);
+
         fetch(`${config.SERVER_URL}/create/`, {
             method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                room_id: room,
-                topic: title,
-                detail: detail,
-                start: start,
-                end: end
-            })
+            body: formData,
+            credentials: 'include'
         })
             .then(res => {
                 console.log(res);

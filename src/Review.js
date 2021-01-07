@@ -1,5 +1,6 @@
 import * as config from './config';
 import React from 'react';
+import { getRoomName } from './tool';
 
 class Reservation extends React.Component {
     constructor(props) {
@@ -23,6 +24,7 @@ class Reservation extends React.Component {
         this.setState({ isLoadedReview: true });
         fetch(`${config.SERVER_URL}/review/`, {
             method: "GET",
+            credentials: 'include'
         })
             .then(res => res.json())
             .then(res => {
@@ -39,6 +41,7 @@ class Reservation extends React.Component {
         this.setState({ isLoadedRoom: true });
         fetch(`${config.SERVER_URL}/room/`, {
             method: "GET",
+            credentials: 'include'
         })
             .then(res => res.json())
             .then(res => {
@@ -51,19 +54,10 @@ class Reservation extends React.Component {
             });
     }
 
-    getRoomName(id) {
-        for (let ele of this.state.rooms) {
-            if (ele._id === id) {
-                return ele.name;
-            }
-        }
-    }
-
     generateList() {
         let reviews = this.state.reviews;
         let list = [];
         for (let ele of reviews) {
-            console.log(ele._id);
             list.push(<tr key={ele._id}>
                 <td className="align-middle">
                     {ele.topic}
@@ -72,7 +66,7 @@ class Reservation extends React.Component {
                     {ele.detail}
                 </td>
                 <td className="align-middle">
-                    {this.getRoomName(ele.room_id)}
+                    {getRoomName(ele.room_id, this.state.rooms)}
                 </td>
                 <td className="align-middle">
                     {ele.start.slice(0, 16)} ~ {ele.end.slice(0, 16)}
@@ -121,6 +115,7 @@ class Reservation extends React.Component {
 
         fetch(`${config.SERVER_URL}/review/${id}/`, {
             method: "POST",
+            credentials: 'include',
             body: formData
         })
             .then(res => {
