@@ -94,6 +94,7 @@ class Header extends React.Component {
     }
 
     checkRole() {
+        this.setState({ isCheckLogin: false });
         fetch(`${config.SERVER_URL}/login/current/`, {
             method: "GET",
             credentials: 'include'
@@ -101,9 +102,12 @@ class Header extends React.Component {
             .then(res => res.json())
             .then(res => {
                 if (!res.status) {
-                    this.setState({ role: "", isCheckLogin: false });
+                    this.setState({ role: "" });
                 } else {
-                    this.setState({ role: res.account.role, name: res.account.username, isCheckLogin: false });
+                    this.setState({
+                        role: res.account.role,
+                        name: res.account.username,
+                    });
                 }
             })
             .catch(e => {
@@ -168,11 +172,13 @@ class Header extends React.Component {
             <Router>
                 <nav className="navbar navbar-expand-lg navbar-light bg-light p-4 border-bottom shadow-sm">
                     <Link to="/" className="navbar-brand">空間管理系統</Link>
-                    <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
-                    {navUlDiv}
-                    {navButton}
+                    <div class="collapse navbar-collapse" id="navbar">
+                        {navUlDiv}
+                        {navButton}
+                    </div>
                 </nav>
 
                 <div className="modal fade" id="login" tabIndex="-1" aria-labelledby="loginLabel" aria-hidden="true">
