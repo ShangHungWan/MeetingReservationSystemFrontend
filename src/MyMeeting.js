@@ -16,6 +16,7 @@ class MyMeeting extends React.Component {
 
         this.handleChange = this.handleChange.bind(this);
         this.getMeetings = this.getMeetings.bind(this);
+        this.leave = this.leave.bind(this);
     }
 
     getMeetings() {
@@ -44,20 +45,21 @@ class MyMeeting extends React.Component {
         event.preventDefault();
         const id = event.target.dataset.id;
 
-        // formData.append('status', actionIdx);
+        let formData = new FormData();
+        formData.append('arID', id);
 
-        // fetch(`${config.SERVER_URL}/review/`, {
-        //     method: "POST",
-        //     credentials: 'include',
-        //     body: formData
-        // })
-        //     .then(res => {
-        //         this.removeElement(id);
-        //         console.log(res);
-        //     })
-        //     .catch(e => {
-        //         console.log(e);
-        //     });
+        fetch(`${config.SERVER_URL}/dropOut/`, {
+            method: "POST",
+            credentials: 'include',
+            body: formData
+        })
+            .then(res => {
+                this.removeElement(id);
+                console.log(res);
+            })
+            .catch(e => {
+                console.log(e);
+            });
     }
 
     removeElement(id) {
@@ -79,14 +81,42 @@ class MyMeeting extends React.Component {
         return "";
     }
 
+    disband(event) {
+        event.preventDefault();
+        const id = event.target.dataset.id;
+
+        let formData = new FormData();
+
+        formData.append('arID', id);
+
+        fetch(`${config.SERVER_URL}/disband/`, {
+            method: "POST",
+            credentials: 'include',
+            body: formData
+        })
+            .then(res => {
+                this.removeElement(id);
+                console.log(res);
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
     generateMeetingList() {
         let meetingList = [];
         let idx = 0;
         for (let ele of this.state.meetings) {
-
-            let action = <td>
-                <button className="btn btn-danger" data-id={this.findMyId(idx)} onClick={this.leave}>退出</button>
-            </td>;
+            let action;
+            if (this.state.name === ele.host_name) {
+                action = <td>
+                    <button className="btn btn-danger" data-id={ele.ar_id} onClick={this.disband}>解散</button>
+                </td>;
+            } else {
+                action = <td>
+                    <button className="btn btn-danger" data-id={this.findMyId(idx)} onClick={this.leave}>退出</button>
+                </td>;
+            }
 
             const status = ele.status;
             let statusTxt;
