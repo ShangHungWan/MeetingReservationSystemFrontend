@@ -15,6 +15,7 @@ class MyMeeting extends React.Component {
         };
 
         this.handleChange = this.handleChange.bind(this);
+        this.getMeetings = this.getMeetings.bind(this);
     }
 
     getMeetings() {
@@ -30,6 +31,7 @@ class MyMeeting extends React.Component {
                 });
             })
             .catch(e => {
+                this.getMeetings();
                 console.log(e);
             });
     }
