@@ -9,9 +9,9 @@ class Reservation extends React.Component {
             date: new Date().toISOString().slice(0, 10),
             rooms: null,
             reservations: null,
+            role: "",
             isLoading: false,
             isChanged: true,
-            role: "",
             isCheckLogin: true,
             isRoomLoaded: false,
         };
@@ -80,19 +80,18 @@ class Reservation extends React.Component {
             let status = [];
             for (let j = 0; j < this.state.rooms.length; j++) {
                 let find = false;
-                if (this.state.reservations) {
-                    this.state.reservations.forEach((ele, idx) => {
-                        const start = new Date(ele.start);
-                        const end = new Date(ele.end);
-                        if ((i + this.startTimeHour) >= start.getHours() && (i + this.startTimeHour) < end.getHours() && ele.room_id === this.state.rooms[j]._id) {
-                            status.push(<td key={`${i}-${j}`} className="table-active align-middle">
-                                <button className="btn btn-link btn-sm" data-toggle="modal" data-target="#reservationDetail" data-reservation={idx} onClick={this.showReservation}>{ele.topic}</button>
-                            </td>);
-                            find = true;
-                            return;
-                        }
-                    });
-                }
+                this.state.reservations.forEach((ele, idx) => {
+                    const start = new Date(ele.start);
+                    const end = new Date(ele.end);
+                    if ((i + this.startTimeHour) >= start.getHours() && (i + this.startTimeHour) < end.getHours() && ele.room_id === this.state.rooms[j]._id) {
+                        status.push(<td key={`${i}-${j}`} className="table-active align-middle">
+                            <button className="btn btn-link btn-sm" data-toggle="modal" data-target="#reservationDetail" data-reservation={idx} onClick={this.showReservation}>{ele.topic}</button>
+                        </td>);
+                        find = true;
+                        return;
+                    }
+                });
+
                 if (!find) {
                     let cell;
                     if (this.state.role !== "") {
@@ -129,6 +128,8 @@ class Reservation extends React.Component {
 
         const header = document.querySelector('#reservationDetail > div > div > div:nth-child(1) > h5 > span')
         header.innerHTML = reservation.topic;
+
+        document.querySelector('#join').dataset._id = this.state.reservations[idx]._id;
     }
 
     showNewReservation(event) {
@@ -192,9 +193,30 @@ class Reservation extends React.Component {
             credentials: 'include'
         })
             .then(res => {
+                window.location = '/';
                 console.log(res);
             })
             .catch(e => {
+                console.log(e);
+            });
+    }
+
+    join() {
+        const reservation_id = document.querySelector('#join').dataset._id;
+
+        let formData = new FormData();
+        formData.append('reservation_id', reservation_id);
+
+        fetch(`${config.SERVER_URL}/join/`, {
+            method: "POST",
+            body: formData,
+            credentials: 'include'
+        })
+            .then(res => {
+                window.location = '/myReservation';
+            })
+            .catch(e => {
+                alert('無法加入！');
                 console.log(e);
             });
     }
@@ -233,20 +255,20 @@ class Reservation extends React.Component {
         if (!this.state.isRoomLoaded) {
             this.getRoomList();
         }
-        if (this.state.rooms === null) {
-            return this.showLoading();
-        }
         if (this.state.isChanged) {
             this.getReservationOfDate();
+        }
+        if (this.state.rooms === null || this.state.reservations === null) {
+            return this.showLoading();
         }
 
         const room = this.generateRoomList();
         const time = this.generateTimeList();
 
-        // let joinBtn = "";
-        // if (this.state.role !== "") {
-        //     joinBtn = <button type="button" className="btn btn-primary">Join</button>;
-        // }
+        let joinBtn = "";
+        if (this.state.role !== "") {
+            joinBtn = <button type="button" className="btn btn-primary" id="join" onClick={this.join}>Join</button>;
+        }
 
         return (
             <div className="container p-4">
@@ -335,7 +357,7 @@ class Reservation extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                {/* {joinBtn} */}
+                                {joinBtn}
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>

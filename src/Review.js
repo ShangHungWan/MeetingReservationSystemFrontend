@@ -64,6 +64,9 @@ class Reservation extends React.Component {
                     {ele.topic}
                 </td>
                 <td className="align-middle">
+                    {ele.username}
+                </td>
+                <td className="align-middle">
                     {ele.detail}
                 </td>
                 <td className="align-middle">
@@ -142,7 +145,7 @@ class Reservation extends React.Component {
             return false;
         }
         for (let i = 0; i < this.state.reviews.length; i++) {
-            if (!this.state.reviews[i]) {
+            if (this.state.reviews[i] === null) {
                 return false;
             }
         }
@@ -197,6 +200,7 @@ class Reservation extends React.Component {
                         <thead>
                             <tr>
                                 <th className="align-middle" scope="col">標題</th>
+                                <th className="align-middle" scope="col">主辦人</th>
                                 <th className="align-middle" scope="col">描述</th>
                                 <th className="align-middle" scope="col">會議室</th>
                                 <th className="align-middle" scope="col">時間</th>

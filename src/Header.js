@@ -4,7 +4,7 @@ import { setCookie } from './tool';
 import $ from 'jquery';
 import './css/Header.css';
 import Reservation from './Reservation';
-import MyMeeting from './MyMeeting';
+import MyReservation from './MyReservation';
 import Review from './Review';
 import { BrowserRouter as Router, Link, Switch, Route } from 'react-router-dom';
 
@@ -145,7 +145,7 @@ class Header extends React.Component {
                         <Link to="/reservation" className="p-2 text-dark navbar-brand">預約狀況</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to="/myMeeting" className="p-2 text-dark navbar-brand">我的會議</Link>
+                        <Link to="/MyReservation" className="p-2 text-dark navbar-brand">我的會議</Link>
                     </li>
                 </ul>;
         } else {
@@ -160,7 +160,7 @@ class Header extends React.Component {
                         <Link to="/reservation" className="p-2 text-dark navbar-brand">預約狀況</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to="/myMeeting" className="p-2 text-dark navbar-brand">我的會議</Link>
+                        <Link to="/MyReservation" className="p-2 text-dark navbar-brand">我的會議</Link>
                     </li>
                     <li className="nav-item">
                         <Link to="/review" className="p-2 text-dark navbar-brand">審核會議</Link>
@@ -245,7 +245,7 @@ class Header extends React.Component {
                 <Switch>
                     <Route path="/" exact component={Reservation} />
                     <Route path="/reservation" component={Reservation} />
-                    <Route path="/myMeeting" component={MyMeeting} />
+                    <Route path="/MyReservation" component={MyReservation} />
                     <Route path="/review" component={Review} />
                 </Switch>
             </Router >
